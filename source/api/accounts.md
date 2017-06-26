@@ -9,7 +9,7 @@ packages add the concept of user documents stored in the database, and
 additional packages add [secure password
 authentication](#accounts_passwords), [integration with third party
 login services](#meteor_loginwithexternalservice), and a [pre-built user
-interface](#accountsui).
+interface](/packages/accounts-ui.html).
 
 The basic Accounts system is in the `accounts-base` package, but
 applications typically include this automatically by adding one of the
@@ -43,26 +43,26 @@ user document:
 
 ```js
 {
-  _id: "bbca5d6a-2156-41c4-89da-0329e8c99a4f",  // Meteor.userId()
-  username: "cool_kid_13", // unique name
+  _id: 'QwkSmTCZiw5KDx3L6',  // Meteor.userId()
+  username: 'cool_kid_13', // Unique name
   emails: [
-    // each email address can only belong to one user.
-    { address: "cool@example.com", verified: true },
-    { address: "another@different.com", verified: false }
+    // Each email address can only belong to one user.
+    { address: 'cool@example.com', verified: true },
+    { address: 'another@different.com', verified: false }
   ],
-  createdAt: Wed Aug 21 2013 15:16:52 GMT-0700 (PDT),
+  createdAt: new Date('Wed Aug 21 2013 15:16:52 GMT-0700 (PDT)'),
   profile: {
     // The profile is writable by the user by default.
-    name: "Joe Schmoe"
+    name: 'Joe Schmoe'
   },
   services: {
     facebook: {
-      id: "709050", // facebook id
-      accessToken: "AAACCgdX7G2...AbV9AZDZD"
+      id: '709050', // Facebook ID
+      accessToken: 'AAACCgdX7G2...AbV9AZDZD'
     },
     resume: {
       loginTokens: [
-        { token: "97e8c205-c7e4-47c9-9bea-8e2ccc0694cd",
+        { token: '97e8c205-c7e4-47c9-9bea-8e2ccc0694cd',
           when: 1349761684048 }
       ]
     }
@@ -90,25 +90,27 @@ treats the following fields specially:
 
 Like all [Mongo.Collection](#collections)s, you can access all
 documents on the server, but only those specifically published by the server are
-available on the client.
+available on the client. You can also use all Collection methods, for instance
+`Meteor.users.remove` on the server to delete a user.
 
 By default, the current user's `username`, `emails` and `profile` are
 published to the client. You can publish additional fields for the
 current user with:
 
 ```js
-// server
-Meteor.publish("userData", function () {
+// Server
+Meteor.publish('userData', function () {
   if (this.userId) {
-    return Meteor.users.find({_id: this.userId},
-                             {fields: {'other': 1, 'things': 1}});
+    return Meteor.users.find({ _id: this.userId }, {
+      fields: { other: 1, things: 1 }
+    });
   } else {
     this.ready();
   }
 });
 
-// client
-Meteor.subscribe("userData");
+// Client
+Meteor.subscribe('userData');
 ```
 
 If the autopublish package is installed, information about all users
@@ -127,7 +129,7 @@ Users are by default allowed to specify their own `profile` field with
 their user document:
 
 ```js
-Meteor.users.deny({update: function () { return true; }});
+Meteor.users.deny({ update: () => true });
 ```
 
 {% apibox "Meteor.loggingIn" %}
@@ -146,6 +148,13 @@ will be logged out.
 {% apibox "Meteor.loginWithPassword" %}
 
 If there are multiple users with a username or email only differing in case, a case sensitive match is required. Although `createUser` won't let you create users with ambiguous usernames or emails, this could happen with existing databases or if you modify the users collection directly.
+
+This method can fail throwing one of the following errors:
+* "Unrecognized options for login request [400]" if `user` or `password` is undefined.
+* "Match failed [400]" if `user` isn't an Object or String, or `password` isn't a String.
+* "User not found [403]" if the email or username provided in `user` doesn't belong to a registered user.
+* "Incorrect password [403]" if the password provided is incorrect.
+* "User has no password set [403]" if `user` doesn't have a password.
 
 This function is provided by the `accounts-password` package. See the
 [Passwords](#accounts_passwords) section below.
@@ -211,12 +220,12 @@ Then, in your app:
 
 ```js
 ServiceConfiguration.configurations.upsert(
-  { service: "weibo" },
+  { service: 'weibo' },
   {
     $set: {
-      clientId: "1292962797",
-      loginStyle: "popup",
-      secret: "75a730b58f5691de5522789070c319bc"
+      clientId: '1292962797',
+      loginStyle: 'popup',
+      secret: '75a730b58f5691de5522789070c319bc'
     }
   }
 );
@@ -231,12 +240,13 @@ meteor add accounts-github
 
 and use the `Meteor.loginWithGithub` function:
 
-```javascript
+```js
 Meteor.loginWithGithub({
   requestPermissions: ['user', 'public_repo']
-}, function (err) {
-  if (err)
-    Session.set('errorMessage', err.reason || 'Unknown error');
+}, (error) => {
+  if (error) {
+    Session.set('errorMessage', error.reason || 'Unknown error');
+  }
 });
 ```
 
@@ -257,7 +267,7 @@ When configuring OAuth login with a provider (such as Facebook or Google), Meteo
 
 You can also pick which type of login to do by passing an option to [`Meteor.loginWith<ExternalService>`](#meteor_loginwithexternalservice)
 
-Usually, the popup-based flow is preferable because the user will not have to reload your whole app at the end of the login flow. However, the popup-based flow requires browser features such as `window.close` and `window.opener` that are not available in all mobile environments. In particular, we recommend using `Meteor.loginWith<ExternalService>({ loginStyle: "redirect" })` in the following environments:
+Usually, the popup-based flow is preferable because the user will not have to reload your whole app at the end of the login flow. However, the popup-based flow requires browser features such as `window.close` and `window.opener` that are not available in all mobile environments. In particular, we recommend using `Meteor.loginWith<ExternalService>({ loginStyle: 'redirect' })` in the following environments:
 
 * Inside UIWebViews (when your app is loaded inside a mobile app)
 * In Safari on iOS8 (`window.close` is not supported due to a bug)
